@@ -48,5 +48,6 @@ class TokenManager @Inject constructor(@ApplicationContext context: Context) {
         val editor = prefs.edit()
         editor.clear()
         editor.apply()
+        editor.commit()
     }
 }

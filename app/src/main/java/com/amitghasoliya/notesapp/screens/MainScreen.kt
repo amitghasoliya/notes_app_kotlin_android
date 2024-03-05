@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -48,20 +47,20 @@ fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boo
     },
         containerColor = Color.White
     ) {
-
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(10.dp, 0.dp)) {
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp,40.dp,0.dp,20.dp), Arrangement.Absolute.SpaceBetween) {
+                .padding(10.dp,20.dp,10.dp,15.dp), Arrangement.Absolute.SpaceBetween) {
                 Text(text = "Notes",
                     fontSize = 36.sp,
                     fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier
+                        .padding(0.dp,50.dp,0.dp,0.dp)
                 )
                 Image(imageVector = Icons.Default.AccountCircle, contentDescription = "", modifier = Modifier
                     .size(34.dp)
-                    .align(Alignment.CenterVertically)
                     .clickable {
                         navController.navigate("userProfile")
                     })

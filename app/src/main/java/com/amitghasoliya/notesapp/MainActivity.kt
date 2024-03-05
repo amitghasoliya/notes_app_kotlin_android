@@ -6,7 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -27,6 +29,7 @@ import com.amitghasoliya.notesapp.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.amitghasoliya.notesapp.screens.UserProfile
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -100,68 +103,79 @@ class MainActivity : ComponentActivity() {
                     navController.popBackStack()
                 }
             }
-
             composable(route= "userProfile"){
-                UserProfile(viewsModel,navController, tokenManager)
+                UserProfile(viewsModel,tokenManager)
             }
         }
     }
 
     private fun bindObservers() {
-        viewsModel.userResponseLiveData.observe(this, Observer {
-            when (it) {
-                is NetworkResult.Success -> {
-                    loading=false
-                    tokenManager.saveToken(it.data!!.token)
-                    tokenManager.saveUserId(it.data.user._id)
-                    tokenManager.saveUsername(it.data.user.username)
-                    tokenManager.saveEmail(it.data.user.email)
-                    navController.popBackStack(0,true)
-                    navController.navigate("mainScreen")
-                    noteViewsModel.getNotes()
-                }
-                is NetworkResult.Error -> {
-                    Toast.makeText(this, it.message.toString(), Toast.LENGTH_SHORT).show()
-                }
-                is NetworkResult.Loading ->{
-                    loading=true
+        this.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewsModel.userResponseStateFlow.collect{
+                    when (it) {
+                        is NetworkResult.Success -> {
+                            loading=false
+                            tokenManager.saveToken(it.data!!.token)
+                            tokenManager.saveUserId(it.data.user._id)
+                            tokenManager.saveUsername(it.data.user.username)
+                            tokenManager.saveEmail(it.data.user.email)
+                            navController.popBackStack(0,true)
+                            navController.navigate("mainScreen")
+                            noteViewsModel.getNotes()
+                        }
+                        is NetworkResult.Error -> {
+                            Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
+                        }
+                        is NetworkResult.Loading ->{
+                            loading=true
+                        }
+                    }
                 }
             }
-        } )
+        }
     }
 
     private fun NoteObservers() {
-        noteViewsModel.notesLiveData.observe(this, Observer {
-            when (it) {
-                is NetworkResult.Success -> {
-                    loading=false
-                    items= it.data!!.reversed()
-                    navController.navigate("mainScreen")
-                }
-                is NetworkResult.Error -> {
-                    Toast.makeText(this, it.message.toString(), Toast.LENGTH_SHORT).show()
-                }
-                is NetworkResult.Loading ->{
-                    loading=true
+        this.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                noteViewsModel.notesFlow.collect{
+                    when (it) {
+                        is NetworkResult.Success -> {
+                            loading=false
+                            items= it.data!!.reversed()
+                            navController.navigate("mainScreen")
+                        }
+                        is NetworkResult.Error -> {
+                            Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
+                        }
+                        is NetworkResult.Loading ->{
+                            loading=true
+                        }
+                    }
                 }
             }
-        } )
+        }
     }
 
     private fun NoteCreationObservers() {
-        noteViewsModel.statusLiveData.observe(this, Observer {
-            when (it) {
-                is NetworkResult.Success -> {
-                    noteViewsModel.getNotes()
-                }
-                is NetworkResult.Error -> {
-                    Toast.makeText(this, it.message.toString(), Toast.LENGTH_SHORT).show()
-                }
-                is NetworkResult.Loading ->{
-                    loading=true
+        this.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                noteViewsModel.statusFlow.collect{
+                    when (it) {
+                        is NetworkResult.Success -> {
+                            noteViewsModel.getNotes()
+                        }
+                        is NetworkResult.Error -> {
+                            Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
+                        }
+                        is NetworkResult.Loading ->{
+                            loading=true
+                        }
+                    }
                 }
             }
-        } )
+        }
     }
 
 }

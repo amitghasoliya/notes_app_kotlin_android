@@ -2,7 +2,6 @@ package com.amitghasoliya.notesapp
 
 import android.text.TextUtils
 import android.util.Patterns
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amitghasoliya.notesapp.models.UserDelete
@@ -11,13 +10,14 @@ import com.amitghasoliya.notesapp.models.UserResponse
 import com.amitghasoliya.notesapp.repository.UserRepository
 import com.amitghasoliya.notesapp.utils.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
-    val userResponseLiveData: LiveData<NetworkResult<UserResponse>>
-        get() = userRepository.userResponseLiveData
+    val userResponseStateFlow: StateFlow<NetworkResult<UserResponse>>
+        get() = userRepository.userResponseStateFlow
 
     fun registerUser(userRequest: UserRequest){
         viewModelScope.launch {

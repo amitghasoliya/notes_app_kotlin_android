@@ -1,5 +1,6 @@
 package com.amitghasoliya.notesapp.screens
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -21,21 +22,23 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.amitghasoliya.notesapp.AuthViewModel
+import com.amitghasoliya.notesapp.MainActivity
 import com.amitghasoliya.notesapp.models.UserDelete
 import com.amitghasoliya.notesapp.ui.theme.GreyLight
 import com.amitghasoliya.notesapp.ui.theme.RedLight
 import com.amitghasoliya.notesapp.utils.TokenManager
 
 @Composable
-fun UserProfile(viewModel:AuthViewModel,navController: NavController, tokenManager: TokenManager){
+fun UserProfile(viewModel:AuthViewModel,tokenManager: TokenManager){
 
+    val context = LocalContext.current
     val name= tokenManager.getUsername().toString()
     val email = tokenManager.getEmail().toString()
     val id = tokenManager.getUserId().toString()
@@ -105,8 +108,7 @@ fun UserProfile(viewModel:AuthViewModel,navController: NavController, tokenManag
             FilledTonalButton(
                 onClick = {
                     tokenManager.logOut()
-                    navController.popBackStack(0,true)
-                    navController.navigate("loginScreen")
+                    context.startActivity(Intent(context, MainActivity::class.java))
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
@@ -125,8 +127,7 @@ fun UserProfile(viewModel:AuthViewModel,navController: NavController, tokenManag
                     val UserId = UserDelete(id)
                     viewModel.deleteUser(UserId)
                     tokenManager.logOut()
-                    navController.popBackStack(0,true)
-                    navController.navigate("loginScreen")
+                    context.startActivity(Intent(context, MainActivity::class.java))
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RedLight,

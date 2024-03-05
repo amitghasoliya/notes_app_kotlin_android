@@ -12,8 +12,8 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteViewModel @Inject constructor(private val noteRepository: NoteRepository): ViewModel() {
 
-    val notesLiveData get() = noteRepository.noteLiveData
-    val statusLiveData get() = noteRepository.statusLiveData
+    val notesFlow get() = noteRepository.notesFlow
+    val statusFlow get() = noteRepository.statusFlow
 
     fun getNotes(){
         viewModelScope.launch {
@@ -40,7 +40,7 @@ class NoteViewModel @Inject constructor(private val noteRepository: NoteReposito
     }
 
     fun validateCredential(title:String,description:String): Pair<Boolean, String>{
-        var result = Pair(true, "")
+        val result = Pair(true, "")
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(description)){
             return Pair(false, "Please Provide Credentials")
         }
@@ -48,7 +48,7 @@ class NoteViewModel @Inject constructor(private val noteRepository: NoteReposito
     }
 
     fun validateNote(title:String,description:String): Pair<Boolean, String>{
-        var result = Pair(true, "")
+        val result = Pair(true, "")
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(description)){
             return Pair(false, "Please Provide Credentials")
         }

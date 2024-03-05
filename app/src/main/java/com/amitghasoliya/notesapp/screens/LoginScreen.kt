@@ -36,13 +36,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.amitghasoliya.notesapp.AuthViewModel
 import com.amitghasoliya.notesapp.models.UserRequest
 import com.amitghasoliya.notesapp.ui.theme.GreyLight
 import com.amitghasoliya.notesapp.ui.theme.RedLight
 import com.amitghasoliya.notesapp.utils.NetworkResult
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavController, viewsModel: AuthViewModel){
@@ -167,18 +170,22 @@ fun LoginScreen(navController: NavController, viewsModel: AuthViewModel){
                     if (result.first){
                         buttonText = "Loading..."
                         viewsModel.loginUser(userRequest)
-                        viewsModel.userResponseLiveData.observe(owner, Observer {
-                            when (it) {
-                                is NetworkResult.Success -> {
-                                }
-                                is NetworkResult.Error -> {
-                                    buttonText = "Login"
-                                }
-                                is NetworkResult.Loading ->{
-                                    buttonText = "Loading..."
+                        owner.lifecycleScope.launch {
+                            owner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                                viewsModel.userResponseStateFlow.collect{
+                                    when (it) {
+                                        is NetworkResult.Success -> {
+                                        }
+                                        is NetworkResult.Error -> {
+                                            buttonText = "Login"
+                                        }
+                                        is NetworkResult.Loading ->{
+                                            buttonText = "Loading..."
+                                        }
+                                    }
                                 }
                             }
-                        } )
+                        }
                     }else{
                         Toast.makeText(context, result.second, Toast.LENGTH_SHORT).show()
                     }},
