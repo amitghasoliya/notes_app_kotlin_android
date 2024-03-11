@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.amitghasoliya.notesapp.AuthViewModel
 import com.amitghasoliya.notesapp.MainActivity
 import com.amitghasoliya.notesapp.models.UserDelete
@@ -109,6 +110,10 @@ fun UserProfile(viewModel:AuthViewModel,tokenManager: TokenManager){
                 onClick = {
                     tokenManager.logOut()
                     context.startActivity(Intent(context, MainActivity::class.java))
+//                    navController.navigate("loginScreen"){
+//                        popUpTo("loginScreen"){inclusive=true}
+//                        launchSingleTop = true
+//                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
