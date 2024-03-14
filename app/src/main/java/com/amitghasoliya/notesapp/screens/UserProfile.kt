@@ -10,19 +10,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -31,28 +44,47 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.amitghasoliya.notesapp.AuthViewModel
 import com.amitghasoliya.notesapp.MainActivity
+import com.amitghasoliya.notesapp.R
 import com.amitghasoliya.notesapp.models.UserDelete
 import com.amitghasoliya.notesapp.ui.theme.GreyLight
 import com.amitghasoliya.notesapp.ui.theme.RedLight
 import com.amitghasoliya.notesapp.utils.TokenManager
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfile(viewModel:AuthViewModel,tokenManager: TokenManager){
+fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManager: TokenManager){
 
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
     val name= tokenManager.getUsername().toString()
     val email = tokenManager.getEmail().toString()
     val id = tokenManager.getUserId().toString()
 
-    Surface(
-        color = Color.White,
-        modifier = Modifier
+    Scaffold(
+        containerColor = Color.White,
+        topBar = { TopAppBar(colors = TopAppBarColors(
+            containerColor = Color.White,
+            titleContentColor = Color.White,
+            scrolledContainerColor = Color.White,
+            actionIconContentColor = Color.White,
+            navigationIconContentColor = Color.Black),
+            navigationIcon = {
+                IconButton(onClick = {navController.popBackStack()}) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow_back),
+                        modifier = Modifier.size(20.dp),
+                        contentDescription = ""
+                    )
+                }
+            }, title = { Text(text = "") })}
+    ) {
+        Column(modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(20.dp)
-    ) {
-        Column {
-            Spacer(modifier = Modifier.height(40.dp))
+            .padding(it)
+            .padding(15.dp, 5.dp)
+            .verticalScroll(scrollState)) {
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text("Profile",
                 color = Color.Black,
@@ -106,14 +138,33 @@ fun UserProfile(viewModel:AuthViewModel,tokenManager: TokenManager){
 
             Spacer(modifier = Modifier.height(50.dp))
 
+            val logOutDialog = remember {
+                mutableStateOf(false)
+            }
+            if (logOutDialog.value){
+                AlertDialog(shape = RoundedCornerShape(18.dp), containerColor = Color.White, titleContentColor = Color.Black, title = { Text(text = "Confirm")}, text = { Text(text = "Are you sure to log out of your account ?", color = Color.Gray)},
+                    onDismissRequest = {logOutDialog.value=false},
+                    dismissButton = {
+                        TextButton(onClick = {
+                        logOutDialog.value = false
+                    }) {
+                        Text(text = "Cancel", color = Color.Black)
+                    }
+                    },
+                    confirmButton = {
+                    TextButton(onClick = {
+                        logOutDialog.value = false
+                        tokenManager.logOut()
+                        context.startActivity(Intent(context, MainActivity::class.java))
+                    }) {
+                        Text(text = "Log Out", color = RedLight)
+                    }
+                })
+
+            }
             FilledTonalButton(
                 onClick = {
-                    tokenManager.logOut()
-                    context.startActivity(Intent(context, MainActivity::class.java))
-//                    navController.navigate("loginScreen"){
-//                        popUpTo("loginScreen"){inclusive=true}
-//                        launchSingleTop = true
-//                    }
+                    logOutDialog.value = true
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
@@ -127,12 +178,36 @@ fun UserProfile(viewModel:AuthViewModel,tokenManager: TokenManager){
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val deleteAccountDialog = remember {
+                mutableStateOf(false)
+            }
+            if (deleteAccountDialog.value){
+                AlertDialog(shape = RoundedCornerShape(18.dp),containerColor = Color.White, titleContentColor = Color.Black, title = { Text(text = "Confirm")}, text = { Text(text = "Are you sure to delete your account permanently?", color = Color.Gray)},
+                    onDismissRequest = {deleteAccountDialog.value=false},
+                    dismissButton = {
+                        TextButton(onClick = {
+                            deleteAccountDialog.value = false
+                        }) {
+                            Text(text = "Cancel", color = Color.Black)
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            deleteAccountDialog.value = false
+                            val userId = UserDelete(id)
+                            viewModel.deleteUser(userId)
+                            tokenManager.logOut()
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }) {
+                            Text(text = "Delete Account", color = RedLight)
+                        }
+                    })
+
+            }
+
             FilledTonalButton(
                 onClick = {
-                    val UserId = UserDelete(id)
-                    viewModel.deleteUser(UserId)
-                    tokenManager.logOut()
-                    context.startActivity(Intent(context, MainActivity::class.java))
+                    deleteAccountDialog.value = true
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RedLight,

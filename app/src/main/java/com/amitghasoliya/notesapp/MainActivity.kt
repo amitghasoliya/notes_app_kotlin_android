@@ -64,7 +64,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     fun App() {
         navController = rememberNavController()
@@ -81,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             composable(route= "addNoteScreen"){
-                AddNoteScreen(noteViewsModel){
+                AddNoteScreen(navController,noteViewsModel){
                     navController.popBackStack()
                     NoteCreationObservers()
                 }
@@ -97,14 +96,14 @@ class MainActivity : ComponentActivity() {
                     type = NavType.StringType
                 }
             )){
-                NoteDetails(it.arguments?.getString("id")!!,it.arguments?.getString("title")!!,it.arguments?.getString("des")!!){
+                NoteDetails(navController,it.arguments?.getString("id")!!,it.arguments?.getString("title")!!,it.arguments?.getString("des")!!){
                     noteViewsModel.getNotes()
                     NoteCreationObservers()
                     navController.popBackStack()
                 }
             }
             composable(route= "userProfile"){
-                UserProfile(viewsModel,tokenManager)
+                UserProfile(navController,viewsModel,tokenManager)
             }
         }
     }
@@ -147,6 +146,8 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("mainScreen")
                         }
                         is NetworkResult.Error -> {
+                            loading = false
+                            noteViewsModel.getNotes()
                             Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
                         }
                         is NetworkResult.Loading ->{
@@ -167,6 +168,8 @@ class MainActivity : ComponentActivity() {
                             noteViewsModel.getNotes()
                         }
                         is NetworkResult.Error -> {
+                            loading=false
+                            noteViewsModel.getNotes()
                             Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
                         }
                         is NetworkResult.Loading ->{

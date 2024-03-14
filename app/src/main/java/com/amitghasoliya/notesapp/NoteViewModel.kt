@@ -11,48 +11,33 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(private val noteRepository: NoteRepository): ViewModel() {
-
     val notesFlow get() = noteRepository.notesFlow
     val statusFlow get() = noteRepository.statusFlow
-
     fun getNotes(){
         viewModelScope.launch {
             noteRepository.getNote()
         }
     }
-
     fun createNote(noteRequest: NoteRequest){
         viewModelScope.launch {
             noteRepository.createNote(noteRequest)
         }
     }
-
     fun updateNote(noteId:String, noteRequest: NoteRequest){
         viewModelScope.launch {
             noteRepository.updateNotes(noteId, noteRequest)
         }
     }
-
     fun deleteNote(noteId:String){
         viewModelScope.launch {
             noteRepository.deleteNotes(noteId)
         }
     }
-
-    fun validateCredential(title:String,description:String): Pair<Boolean, String>{
+    fun validateNote(title:String): Pair<Boolean, String>{
         val result = Pair(true, "")
-        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(description)){
-            return Pair(false, "Please Provide Credentials")
+        if (TextUtils.isEmpty(title.trim())){
+            return Pair(false, "Enter correct inputs")
         }
         return result
     }
-
-    fun validateNote(title:String,description:String): Pair<Boolean, String>{
-        val result = Pair(true, "")
-        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(description)){
-            return Pair(false, "Please Provide Credentials")
-        }
-        return result
-    }
-
 }

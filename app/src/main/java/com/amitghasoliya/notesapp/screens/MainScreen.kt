@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.amitghasoliya.notesapp.api.ProgressBar
 import com.amitghasoliya.notesapp.models.NoteResponse
 import com.amitghasoliya.notesapp.ui.theme.GreyLight
 
@@ -52,7 +54,7 @@ fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boo
             .padding(10.dp, 0.dp)) {
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp,20.dp,10.dp,15.dp), Arrangement.Absolute.SpaceBetween) {
+                .padding(10.dp, 20.dp, 10.dp, 15.dp), Arrangement.Absolute.SpaceBetween) {
                 Text(text = "Notes",
                     fontSize = 36.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -61,15 +63,14 @@ fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boo
                 )
                 Image(imageVector = Icons.Default.AccountCircle, contentDescription = "", modifier = Modifier
                     .size(34.dp)
+                    .clip(CircleShape)
                     .clickable {
                         navController.navigate("userProfile")
                     })
             }
+
             if (loading){
-                Text(text = "Loading...", textAlign = TextAlign.Center, modifier = Modifier
-                    .fillMaxSize()
-                    .wrapContentSize()
-                )
+                ProgressBar()
             }else if (data.isEmpty()){
                 Text(text = "Notes not available", textAlign = TextAlign.Center, modifier = Modifier
                     .fillMaxSize()

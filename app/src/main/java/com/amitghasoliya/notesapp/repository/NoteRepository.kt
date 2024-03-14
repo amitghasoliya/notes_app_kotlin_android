@@ -30,8 +30,12 @@ class NoteRepository @Inject constructor(private val noteAPI: NoteAPI) {
             _notesFlow.emit(NetworkResult.Success(response.body()!!))
         }
         else if(response.errorBody()!=null){
-            val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
-            _notesFlow.emit(NetworkResult.Error(errorObj.getString("message")))
+            try {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _notesFlow.emit(NetworkResult.Error(errorObj.getString("message")))
+            }catch (e:Exception){
+                _notesFlow.emit(NetworkResult.Error("Something Went Wrong"))
+            }
         }
         else{
             _notesFlow.emit(NetworkResult.Error("Something Went Wrong"))

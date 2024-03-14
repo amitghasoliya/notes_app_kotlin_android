@@ -38,8 +38,12 @@ class UserRepository @Inject constructor(private val userAPI: UserAPI){
             _userResponseStateFlow.emit(NetworkResult.Success(response.body()!!))
         }
         else if(response.errorBody()!=null){
-            val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
-            _userResponseStateFlow.emit(NetworkResult.Error(errorObj.getString("message")))
+            try {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _userResponseStateFlow.emit(NetworkResult.Error(errorObj.getString("message")))
+            }catch (e:Exception){
+                _userResponseStateFlow.emit(NetworkResult.Error("Something Went Wrong"))
+            }
         }
         else{
             _userResponseStateFlow.emit(NetworkResult.Error("Something Went Wrong"))
