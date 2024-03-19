@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.amitghasoliya.notesapp.AuthViewModel
 import com.amitghasoliya.notesapp.MainActivity
@@ -52,10 +54,11 @@ import com.amitghasoliya.notesapp.utils.TokenManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManager: TokenManager){
+fun UserProfile(navController: NavController,tokenManager: TokenManager){
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val authViewModel:AuthViewModel = hiltViewModel()
     val name= tokenManager.getUsername().toString()
     val email = tokenManager.getEmail().toString()
     val id = tokenManager.getUserId().toString()
@@ -94,6 +97,7 @@ fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManage
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -114,6 +118,7 @@ fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManage
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
             )
 
@@ -133,6 +138,7 @@ fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManage
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
             )
 
@@ -171,6 +177,7 @@ fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManage
                     contentColor = Color.White),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Log Out", fontSize = 18.sp)
@@ -195,14 +202,13 @@ fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManage
                         TextButton(onClick = {
                             deleteAccountDialog.value = false
                             val userId = UserDelete(id)
-                            viewModel.deleteUser(userId)
+                            authViewModel.deleteUser(userId)
                             tokenManager.logOut()
                             context.startActivity(Intent(context, MainActivity::class.java))
                         }) {
                             Text(text = "Delete Account", color = RedLight)
                         }
                     })
-
             }
 
             FilledTonalButton(
@@ -214,10 +220,14 @@ fun UserProfile(navController: NavController,viewModel:AuthViewModel,tokenManage
                     contentColor = Color.Black),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Delete Account", fontSize = 18.sp)
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
         }
     }
 

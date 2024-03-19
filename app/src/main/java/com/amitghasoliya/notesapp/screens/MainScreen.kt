@@ -1,6 +1,6 @@
 package com.amitghasoliya.notesapp.screens
 
-import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,40 +21,69 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.amitghasoliya.notesapp.NoteViewModel
 import com.amitghasoliya.notesapp.api.ProgressBar
 import com.amitghasoliya.notesapp.models.NoteResponse
 import com.amitghasoliya.notesapp.ui.theme.GreyLight
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boolean, onClick: (id:String) -> Unit) {
+fun MainScreen(navController: NavController,onClick: (id:String) -> Unit) {
+
+    val notesViewModel : NoteViewModel = hiltViewModel()
+    val context = LocalContext.current
+
+    val data by notesViewModel.notes.collectAsState()
+    val isLoading by notesViewModel.isLoading
+
+    val errorMessage by notesViewModel.errorMessage
+    errorMessage?.let { message ->
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        notesViewModel.clearErrorMessage()
+    }
+
+    LaunchedEffect(Unit) {
+        if (data.isEmpty()){
+            notesViewModel.isLoading.value = true
+            notesViewModel.getNotes()
+        }else{
+            notesViewModel.isLoading.value = false
+            notesViewModel.getNotes()
+        }
+    }
 
     Scaffold(floatingActionButton = {
-        FloatingActionButton(onClick = { navController.navigate("addNoteScreen") }, containerColor = Color.Black, contentColor = Color.White) {
+        ExtendedFloatingActionButton(modifier = Modifier.padding(6.dp), onClick = { navController.navigate("addNoteScreen") }, containerColor = Color.Black, contentColor = Color.White) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "")
+            Text(text = "New", modifier = Modifier.padding(6.dp,0.dp))
         }
     },
         containerColor = Color.White
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp, 0.dp)) {
+            .padding(it)
+            .padding(8.dp, 0.dp)) {
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp, 20.dp, 10.dp, 15.dp), Arrangement.Absolute.SpaceBetween) {
+                .padding(10.dp, 20.dp, 10.dp, 10.dp), Arrangement.Absolute.SpaceBetween) {
                 Text(text = "Notes",
                     fontSize = 36.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -69,7 +98,7 @@ fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boo
                     })
             }
 
-            if (loading){
+            if (isLoading){
                 ProgressBar()
             }else if (data.isEmpty()){
                 Text(text = "Notes not available", textAlign = TextAlign.Center, modifier = Modifier
@@ -80,7 +109,7 @@ fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boo
 
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxWidth(),
-                columns = GridCells.Fixed(2)
+                columns = GridCells.Adaptive(160.dp)
             ){
                 items(data){ data ->
                     Item(noteResponse = data, onClick)
@@ -93,10 +122,10 @@ fun MainScreen(navController: NavController,data: List<NoteResponse>,loading:Boo
 @Composable
 fun Item(noteResponse: NoteResponse, onClick: (id:String)-> Unit) {
     Column(modifier = Modifier
-        .padding(3.dp)
+        .padding(3.dp,0.dp,3.dp,6.dp)
         .clip(RoundedCornerShape(10.dp))
         .background(GreyLight)
-        .height(180.dp)
+        .height(184.dp)
         .clickable {
             onClick("${noteResponse._id}/${noteResponse.title}/${noteResponse.description}")
         }

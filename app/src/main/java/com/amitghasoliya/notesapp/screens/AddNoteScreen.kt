@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -92,16 +92,13 @@ fun AddNoteScreen(navController: NavController,noteViewsModel: NoteViewModel, on
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            var title by remember{
-                mutableStateOf("")
-            }
-            var description by remember{
-                mutableStateOf("")
-            }
+            var title by remember{ mutableStateOf("") }
+            var description by remember{ mutableStateOf("") }
 
             val customCursor = TextSelectionColors(handleColor = RedLight, backgroundColor = Color.Black)
             CompositionLocalProvider(LocalTextSelectionColors provides customCursor) {
@@ -122,6 +119,7 @@ fun AddNoteScreen(navController: NavController,noteViewsModel: NoteViewModel, on
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
                 )
 
@@ -146,6 +144,7 @@ fun AddNoteScreen(navController: NavController,noteViewsModel: NoteViewModel, on
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
                         .defaultMinSize(0.dp, 200.dp)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
 
@@ -176,12 +175,13 @@ fun AddNoteScreen(navController: NavController,noteViewsModel: NoteViewModel, on
                     contentColor = Color.White),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Create Note", fontSize = 18.sp)
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
-        Spacer(modifier = Modifier.width(20.dp))
     }
 }
 

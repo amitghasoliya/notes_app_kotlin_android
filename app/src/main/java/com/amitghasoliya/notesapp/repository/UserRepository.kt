@@ -18,13 +18,11 @@ class UserRepository @Inject constructor(private val userAPI: UserAPI){
         get() = _userResponseStateFlow
 
     suspend fun registerUser(userReq: UserRequest){
-        _userResponseStateFlow.emit(NetworkResult.Loading())
         val response = userAPI.signup(userReq)
         handleResponse(response)
     }
 
     suspend fun loginUser(userReq: UserRequest){
-        _userResponseStateFlow.emit(NetworkResult.Loading())
         val response = userAPI.signin(userReq)
         handleResponse(response)
     }

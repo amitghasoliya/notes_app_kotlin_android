@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,12 +65,8 @@ fun NoteDetails(
     val context = LocalContext.current
     val noteViewsModel : NoteViewModel = hiltViewModel()
     val scrollState = rememberScrollState()
-    var description by remember{
-        mutableStateOf(des.trim())
-    }
-    var newTitle by remember{
-        mutableStateOf(title)
-    }
+    var description by remember{ mutableStateOf(des.trim()) }
+    var newTitle by remember{ mutableStateOf(title) }
 
     Scaffold(
         containerColor = Color.White,
@@ -106,6 +103,7 @@ fun NoteDetails(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -129,6 +127,7 @@ fun NoteDetails(
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -152,6 +151,7 @@ fun NoteDetails(
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
                         .defaultMinSize(0.dp, 200.dp)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
                 )
@@ -161,10 +161,11 @@ fun NoteDetails(
 
             FilledTonalButton(
                 onClick = {
-                    val noteRequest = NoteRequest(title, description)
+                    val noteRequest = NoteRequest(newTitle, description)
                     val result = noteViewsModel.validateNote(title)
                     if (result.first){
                         noteViewsModel.updateNote(id,noteRequest)
+                        noteViewsModel.isLoading.value = true
                         onClick()
                     }else{
                         Toast.makeText(context, result.second, Toast.LENGTH_SHORT).show()
@@ -175,6 +176,7 @@ fun NoteDetails(
                     contentColor = Color.White),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Update Note", fontSize = 18.sp)
@@ -192,11 +194,12 @@ fun NoteDetails(
                     contentColor = Color.Black),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Delete Note", fontSize = 18.sp)
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
-
 }

@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -26,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,9 +45,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.amitghasoliya.notesapp.AuthViewModel
 import com.amitghasoliya.notesapp.R
@@ -52,20 +53,42 @@ import com.amitghasoliya.notesapp.api.ProgressBarButton
 import com.amitghasoliya.notesapp.models.UserRequest
 import com.amitghasoliya.notesapp.ui.theme.GreyLight
 import com.amitghasoliya.notesapp.ui.theme.RedLight
-import com.amitghasoliya.notesapp.utils.NetworkResult
-import kotlinx.coroutines.launch
+import com.amitghasoliya.notesapp.utils.TokenManager
 
 @Composable
-fun LoginScreen(navController: NavController, viewsModel: AuthViewModel){
+fun LoginScreen(navController: NavController, tokenManager:TokenManager){
 
-    val owner = LocalLifecycleOwner.current
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
+    val authViewModel:AuthViewModel = hiltViewModel()
+    val userData by authViewModel.user.collectAsState()
+    val errorMessage by authViewModel.errorMessage
+
+    var buttonLoading by remember {
+        mutableStateOf(false)
+    }
+
+    if (userData != null){
+        tokenManager.saveToken(userData!!.token)
+        tokenManager.saveUserId(userData!!.user._id)
+        tokenManager.saveUsername(userData!!.user.username)
+        tokenManager.saveEmail(userData!!.user.email)
+        navController.popBackStack(0,true)
+        navController.navigate("mainScreen")
+    }else{
+        buttonLoading = false
+        errorMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            authViewModel.clearErrorMessage()
+        }
+    }
 
     Surface(
         color = Color.White,
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .verticalScroll(scrollState)
             .padding(20.dp)
     ) {
         Column {
@@ -135,6 +158,7 @@ fun LoginScreen(navController: NavController, viewsModel: AuthViewModel){
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
 
             )
@@ -176,37 +200,19 @@ fun LoginScreen(navController: NavController, viewsModel: AuthViewModel){
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            var buttonLoading by remember {
-                mutableStateOf(false)
-            }
             FilledTonalButton(
                 onClick = {
                     val userRequest = UserRequest(email, password, "")
-                    val result = viewsModel.validateCredential(email, password, "", true)
+                    val result = authViewModel.validateCredential(email, password, "", true)
                     if (result.first){
                         buttonLoading = true
-                        viewsModel.loginUser(userRequest)
-                        owner.lifecycleScope.launch {
-                            owner.repeatOnLifecycle(Lifecycle.State.STARTED){
-                                viewsModel.userResponseStateFlow.collect{
-                                    when (it) {
-                                        is NetworkResult.Success -> {
-                                        }
-                                        is NetworkResult.Error -> {
-                                            buttonLoading = false
-                                        }
-                                        is NetworkResult.Loading ->{
-                                            buttonLoading = true
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        authViewModel.loginUser(userRequest)
                     }else{
                         Toast.makeText(context, result.second, Toast.LENGTH_SHORT).show()
                     }},
@@ -215,6 +221,7 @@ fun LoginScreen(navController: NavController, viewsModel: AuthViewModel){
                     contentColor = Color.White),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .requiredWidthIn(max = 420.dp)
                     .defaultMinSize(0.dp, 48.dp)
                 ) {
                 if (buttonLoading){

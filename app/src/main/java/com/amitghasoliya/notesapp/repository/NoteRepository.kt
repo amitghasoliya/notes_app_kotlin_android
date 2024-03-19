@@ -22,7 +22,6 @@ class NoteRepository @Inject constructor(private val noteAPI: NoteAPI) {
         get() = _statusFlow
 
     suspend fun getNote(){
-        _statusFlow.emit(NetworkResult.Loading())
         val response = noteAPI.getNotes()
         Log.d("test156",response.body().toString())
 

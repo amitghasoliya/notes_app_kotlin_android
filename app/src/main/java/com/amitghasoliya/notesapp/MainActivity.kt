@@ -1,14 +1,11 @@
 package com.amitghasoliya.notesapp
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -17,43 +14,34 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.amitghasoliya.notesapp.api.UserAPI
-import com.amitghasoliya.notesapp.models.NoteResponse
 import com.amitghasoliya.notesapp.screens.AddNoteScreen
 import com.amitghasoliya.notesapp.screens.LoginScreen
 import com.amitghasoliya.notesapp.screens.MainScreen
 import com.amitghasoliya.notesapp.screens.NoteDetails
 import com.amitghasoliya.notesapp.screens.RegisterScreen
 import com.amitghasoliya.notesapp.ui.theme.NotesAppTheme
-import com.amitghasoliya.notesapp.utils.NetworkResult
 import com.amitghasoliya.notesapp.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.amitghasoliya.notesapp.screens.UserProfile
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var userAPI: UserAPI
-    private val viewsModel by viewModels<AuthViewModel>()
     private val noteViewsModel by viewModels<NoteViewModel>()
-    lateinit var navController: NavController
-    var loading: Boolean = true
-    var startDestination: String = "loginScreen"
-    var items : List<NoteResponse> = listOf()
+    private lateinit var navController: NavController
 
     @Inject
     lateinit var tokenManager: TokenManager
 
+    private var startDestination =mutableStateOf("loginScreen")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        bindObservers()
-        NoteObservers()
-
-        startDestination = if(tokenManager.getToken() != null){
-            noteViewsModel.getNotes()
+        startDestination.value = if(tokenManager.getToken() != null){
             "mainScreen"
         }else{
             "loginScreen"
@@ -64,25 +52,25 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     @Composable
     fun App() {
         navController = rememberNavController()
-        NavHost(navController = navController as NavHostController, startDestination = startDestination){
+        NavHost(navController = navController as NavHostController, startDestination = startDestination.value){
             composable(route= "loginScreen"){
-                LoginScreen( navController, viewsModel)
+                LoginScreen( navController, tokenManager)
             }
             composable(route= "registerScreen"){
-                RegisterScreen(navController, viewsModel)
+                RegisterScreen(navController, tokenManager)
             }
             composable(route= "mainScreen"){
-                MainScreen(navController,items, loading){
+                MainScreen(navController){
                     navController.navigate("noteDetailScreen/${it}")
                 }
             }
             composable(route= "addNoteScreen"){
                 AddNoteScreen(navController,noteViewsModel){
                     navController.popBackStack()
-                    NoteCreationObservers()
                 }
             }
             composable(route= "noteDetailScreen/{id}/{title}/{des}", arguments = listOf(
@@ -97,89 +85,13 @@ class MainActivity : ComponentActivity() {
                 }
             )){
                 NoteDetails(navController,it.arguments?.getString("id")!!,it.arguments?.getString("title")!!,it.arguments?.getString("des")!!){
-                    noteViewsModel.getNotes()
-                    NoteCreationObservers()
                     navController.popBackStack()
                 }
             }
             composable(route= "userProfile"){
-                UserProfile(navController,viewsModel,tokenManager)
+                UserProfile(navController,tokenManager)
             }
         }
     }
-
-    private fun bindObservers() {
-        this.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                viewsModel.userResponseStateFlow.collect{
-                    when (it) {
-                        is NetworkResult.Success -> {
-                            loading=false
-                            tokenManager.saveToken(it.data!!.token)
-                            tokenManager.saveUserId(it.data.user._id)
-                            tokenManager.saveUsername(it.data.user.username)
-                            tokenManager.saveEmail(it.data.user.email)
-                            navController.popBackStack(0,true)
-                            navController.navigate("mainScreen")
-                            noteViewsModel.getNotes()
-                        }
-                        is NetworkResult.Error -> {
-                            Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
-                        }
-                        is NetworkResult.Loading ->{
-                            loading=true
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun NoteObservers() {
-        this.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                noteViewsModel.notesFlow.collect{
-                    when (it) {
-                        is NetworkResult.Success -> {
-                            loading=false
-                            items= it.data!!.reversed()
-                            navController.navigate("mainScreen")
-                        }
-                        is NetworkResult.Error -> {
-                            loading = false
-                            noteViewsModel.getNotes()
-                            Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
-                        }
-                        is NetworkResult.Loading ->{
-                            loading=true
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun NoteCreationObservers() {
-        this.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                noteViewsModel.statusFlow.collect{
-                    when (it) {
-                        is NetworkResult.Success -> {
-                            noteViewsModel.getNotes()
-                        }
-                        is NetworkResult.Error -> {
-                            loading=false
-                            noteViewsModel.getNotes()
-                            Toast.makeText(this@MainActivity, it.message.toString(), Toast.LENGTH_SHORT).show()
-                        }
-                        is NetworkResult.Loading ->{
-                            loading=true
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 }
 

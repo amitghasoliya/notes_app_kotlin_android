@@ -2,6 +2,8 @@ package com.amitghasoliya.notesapp
 
 import android.text.TextUtils
 import android.util.Patterns
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.amitghasoliya.notesapp.models.UserDelete
@@ -10,14 +12,44 @@ import com.amitghasoliya.notesapp.models.UserResponse
 import com.amitghasoliya.notesapp.repository.UserRepository
 import com.amitghasoliya.notesapp.utils.NetworkResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
-    val userResponseStateFlow: StateFlow<NetworkResult<UserResponse>>
-        get() = userRepository.userResponseStateFlow
+
+    private val _user = MutableStateFlow<UserResponse?>(null)
+    val user: StateFlow<UserResponse?> = _user
+
+    private val _errorMessage = mutableStateOf<String?>(null)
+    val errorMessage: State<String?> = _errorMessage
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
+
+    init {
+        observeAuth()
+    }
+
+    private fun observeAuth() {
+        viewModelScope.launch {
+            userRepository.userResponseStateFlow.collect {
+                when (it) {
+                    is NetworkResult.Success -> {
+                        _user.emit(it.data)
+                    }
+                    is NetworkResult.Error -> {
+                        _errorMessage.value = it.message
+                    }
+                    is NetworkResult.Loading -> {
+                    }
+                }
+            }
+        }
+    }
 
     fun registerUser(userRequest: UserRequest){
         viewModelScope.launch {
