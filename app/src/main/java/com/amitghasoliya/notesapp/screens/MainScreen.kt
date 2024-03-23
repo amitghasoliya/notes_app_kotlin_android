@@ -62,10 +62,18 @@ fun MainScreen(navController: NavController,onClick: (id:String) -> Unit) {
     LaunchedEffect(Unit) {
         if (data.isEmpty()){
             notesViewModel.isLoading.value = true
-            notesViewModel.getNotes()
+            try {
+                notesViewModel.getNotes()
+            }catch (e:Exception){
+                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
+            }
         }else{
             notesViewModel.isLoading.value = false
-            notesViewModel.getNotes()
+            try {
+                notesViewModel.getNotes()
+            }catch (e:Exception){
+                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -122,12 +130,15 @@ fun MainScreen(navController: NavController,onClick: (id:String) -> Unit) {
 @Composable
 fun Item(noteResponse: NoteResponse, onClick: (id:String)-> Unit) {
     Column(modifier = Modifier
-        .padding(3.dp,0.dp,3.dp,6.dp)
+        .padding(3.dp, 0.dp, 3.dp, 6.dp)
         .clip(RoundedCornerShape(10.dp))
         .background(GreyLight)
         .height(184.dp)
         .clickable {
-            onClick("${noteResponse._id}/${noteResponse.title}/${noteResponse.description}")
+            val description = noteResponse.description.ifEmpty {
+                " "
+            }
+            onClick("${noteResponse._id}/${noteResponse.title}/${description}")
         }
     ) {
         Text(text = noteResponse.title,

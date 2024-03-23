@@ -24,9 +24,9 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
@@ -110,7 +110,7 @@ fun NoteDetails(
 
             val customCursor = TextSelectionColors(handleColor = RedLight, backgroundColor = Color.Black)
             CompositionLocalProvider(LocalTextSelectionColors provides customCursor) {
-                OutlinedTextField(value = newTitle,
+                TextField(value = newTitle,
                     onValueChange = {newTitle  = it},
                     placeholder = {Text(text = "Enter title")},
                     colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
@@ -132,7 +132,7 @@ fun NoteDetails(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
-                OutlinedTextField(value = description,
+                TextField(value = description,
                     onValueChange = {
                         description  = it
                     },

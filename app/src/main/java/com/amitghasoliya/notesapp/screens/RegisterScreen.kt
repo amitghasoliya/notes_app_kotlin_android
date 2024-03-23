@@ -19,17 +19,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,7 +96,7 @@ fun RegisterScreen(navController: NavController, tokenManager: TokenManager){
             .padding(24.dp)
     ) {
         Column {
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             Text("Create new account",
                 color = Color.Black,
@@ -107,96 +110,95 @@ fun RegisterScreen(navController: NavController, tokenManager: TokenManager){
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            var username by remember{
-                mutableStateOf("")
-            }
-            OutlinedTextField(value = username,
-                onValueChange = {username  = it},
-                placeholder = {Text(text = "Your name")},
-                colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Black,
-                    cursorColor = Color.Black,
-                    unfocusedContainerColor = GreyLight,
-                    unfocusedPlaceholderColor = Color.Gray,
-                    unfocusedTextColor = Color.Black
-                ),
-                maxLines = 1,
-                shape = RoundedCornerShape(6.dp),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            var email by remember{
-                mutableStateOf("")
-            }
-            OutlinedTextField(value = email,
-                onValueChange = {email  = it},
-                placeholder = {Text(text = "Email")},
-                colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Black,
-                    cursorColor = Color.Black,
-                    unfocusedContainerColor = GreyLight,
-                    unfocusedPlaceholderColor = Color.Gray,
-                    unfocusedTextColor = Color.Black
-                ),
-                maxLines = 1,
-                shape = RoundedCornerShape(6.dp),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
+            var username by remember{ mutableStateOf("") }
+            var email by remember{ mutableStateOf("") }
             var password by remember{mutableStateOf("")}
             var showPassword by remember{mutableStateOf(false)}
 
-            OutlinedTextField(value = password,
-                onValueChange = {
-                    password  = it
-                },
-                visualTransformation = if(showPassword){
-                    VisualTransformation.None
-                }else{
-                    PasswordVisualTransformation() },
-                trailingIcon = {if (showPassword){
-                    IconButton(onClick = {showPassword=false}) {
-                        Icon(painter = painterResource(id = R.drawable.visibility_off), contentDescription = "", modifier = Modifier.size(22.dp), tint = Color.Black)
-                    }
-                }else{
-                    IconButton(onClick = {showPassword=true}) {
-                        Icon(painter = painterResource(id = R.drawable.visibility_on), contentDescription = "", modifier = Modifier.size(20.dp), tint = Color.Black)
-                    }
-                }},
-                placeholder = {Text(text = "Password")},
-                colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Black,
-                    cursorColor = Color.Black,
-                    unfocusedContainerColor = GreyLight,
-                    unfocusedPlaceholderColor = Color.Gray,
-                    unfocusedTextColor = Color.Black
-                ),
-                maxLines = 1,
-                shape = RoundedCornerShape(6.dp),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
-            )
+            val customCursor = TextSelectionColors(handleColor = RedLight, backgroundColor = Color.Black)
+            CompositionLocalProvider(LocalTextSelectionColors provides customCursor) {
+                TextField(value = username,
+                    onValueChange = {username  = it},
+                    placeholder = {Text(text = "Your name")},
+                    colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.Black,
+                        cursorColor = Color.Black,
+                        unfocusedContainerColor = GreyLight,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        unfocusedTextColor = Color.Black
+                    ),
+                    maxLines = 1,
+                    shape = RoundedCornerShape(6.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
+                        .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                TextField(value = email,
+                    onValueChange = {email  = it},
+                    placeholder = {Text(text = "Email")},
+                    colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.Black,
+                        cursorColor = Color.Black,
+                        unfocusedContainerColor = GreyLight,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        unfocusedTextColor = Color.Black
+                    ),
+                    maxLines = 1,
+                    shape = RoundedCornerShape(6.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
+                        .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                TextField(value = password,
+                    onValueChange = {
+                        password  = it
+                    },
+                    visualTransformation = if(showPassword){
+                        VisualTransformation.None
+                    }else{
+                        PasswordVisualTransformation() },
+                    trailingIcon = {if (showPassword){
+                        IconButton(onClick = {showPassword=false}) {
+                            Icon(painter = painterResource(id = R.drawable.visibility_off), contentDescription = "", modifier = Modifier.size(22.dp), tint = Color.Black)
+                        }
+                    }else{
+                        IconButton(onClick = {showPassword=true}) {
+                            Icon(painter = painterResource(id = R.drawable.visibility_on), contentDescription = "", modifier = Modifier.size(20.dp), tint = Color.Black)
+                        }
+                    }},
+                    placeholder = {Text(text = "Password")},
+                    colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.Black,
+                        cursorColor = Color.Black,
+                        unfocusedContainerColor = GreyLight,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        unfocusedTextColor = Color.Black
+                    ),
+                    maxLines = 1,
+                    shape = RoundedCornerShape(6.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredWidthIn(max = 420.dp)
+                        .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
+                )
+            }
 
             Spacer(modifier = Modifier.height(30.dp))
 
