@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -33,6 +34,7 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -59,9 +61,10 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     val authViewModel:AuthViewModel = hiltViewModel()
-    val name= tokenManager.getUsername().toString()
-    val email = tokenManager.getEmail().toString()
-    val id = tokenManager.getUserId().toString()
+    val name= remember { mutableStateOf(tokenManager.getUsername().toString()) }
+    val email =remember { mutableStateOf(tokenManager.getEmail().toString()) }
+    val id = remember { mutableStateOf(tokenManager.getUserId().toString()) }
+    val maxWidth = remember { mutableStateOf(440.dp) }
 
     Scaffold(
         containerColor = Color.White,
@@ -102,7 +105,7 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            TextField(value = name,
+            TextField(value = name.value,
                 onValueChange = {},
                 placeholder = {Text(text = "Enter title")},
                 colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
@@ -113,18 +116,18 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
                     unfocusedContainerColor = GreyLight
                 ),
                 readOnly = true,
-                maxLines = 1,
+                singleLine = true,
                 shape = RoundedCornerShape(6.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
+                    .width(maxWidth.value)
+                    .align(Alignment.CenterHorizontally)
                     .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            TextField(value = email,
+            TextField(value = email.value,
                 onValueChange = {},
                 readOnly = true,
                 colors = TextFieldDefaults.colors(focusedContainerColor = GreyLight,
@@ -134,11 +137,11 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
                     unfocusedTextColor = Color.Black,
                     unfocusedContainerColor = GreyLight
                 ),
-                maxLines = 1,
+                singleLine = true,
                 shape = RoundedCornerShape(6.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
+                    .width(maxWidth.value)
+                    .align(Alignment.CenterHorizontally)
                     .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
             )
 
@@ -176,8 +179,8 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
                     containerColor = Color.Black,
                     contentColor = Color.White),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
+                    .width(maxWidth.value)
+                    .align(Alignment.CenterHorizontally)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Log Out", fontSize = 18.sp)
@@ -185,9 +188,7 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val deleteAccountDialog = remember {
-                mutableStateOf(false)
-            }
+            val deleteAccountDialog = remember { mutableStateOf(false) }
             if (deleteAccountDialog.value){
                 AlertDialog(shape = RoundedCornerShape(18.dp),containerColor = Color.White, titleContentColor = Color.Black, title = { Text(text = "Confirm")}, text = { Text(text = "Are you sure to delete your account permanently?", color = Color.Gray)},
                     onDismissRequest = {deleteAccountDialog.value=false},
@@ -201,7 +202,7 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
                     confirmButton = {
                         TextButton(onClick = {
                             deleteAccountDialog.value = false
-                            val userId = UserDelete(id)
+                            val userId = UserDelete(id.value)
                             authViewModel.deleteUser(userId)
                             tokenManager.logOut()
                             context.startActivity(Intent(context, MainActivity::class.java))
@@ -219,16 +220,13 @@ fun UserProfile(navController: NavController,tokenManager: TokenManager){
                     containerColor = RedLight,
                     contentColor = Color.Black),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
+                    .width(maxWidth.value)
+                    .align(Alignment.CenterHorizontally)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
                 Text(text = "Delete Account", fontSize = 18.sp)
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-
         }
     }
-
 }

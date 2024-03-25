@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -145,11 +146,14 @@ fun Item(noteResponse: NoteResponse, onClick: (id:String)-> Unit) {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(8.dp, 6.dp),
-            maxLines = 1
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Text(text = noteResponse.description,
             fontSize = 14.sp,
             lineHeight = 18.sp,
-            modifier = Modifier.padding(8.dp, 0.dp))
+            modifier = Modifier.padding(8.dp, 0.dp),
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

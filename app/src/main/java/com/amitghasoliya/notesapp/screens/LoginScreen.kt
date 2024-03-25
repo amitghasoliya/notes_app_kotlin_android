@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +67,7 @@ fun LoginScreen(navController: NavController, tokenManager:TokenManager){
     val authViewModel:AuthViewModel = hiltViewModel()
     val userData by authViewModel.user.collectAsState()
     val errorMessage by authViewModel.errorMessage
+    val maxWidth = remember { mutableStateOf(440.dp) }
 
     var buttonLoading by remember { mutableStateOf(false) }
 
@@ -157,14 +159,13 @@ fun LoginScreen(navController: NavController, tokenManager:TokenManager){
                         unfocusedPlaceholderColor = Color.Gray,
                         unfocusedTextColor = Color.Black
                     ),
-                    maxLines = 1,
+                    singleLine = true,
                     shape = RoundedCornerShape(6.dp),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredWidthIn(max = 420.dp)
+                        .width(maxWidth.value)
+                        .align(Alignment.CenterHorizontally)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
-
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -196,12 +197,12 @@ fun LoginScreen(navController: NavController, tokenManager:TokenManager){
                         unfocusedPlaceholderColor = Color.Gray,
                         unfocusedTextColor = Color.Black
                     ),
-                    maxLines = 1,
+                    singleLine = true,
                     shape = RoundedCornerShape(6.dp),
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredWidthIn(max = 420.dp)
+                        .width(maxWidth.value)
+                        .align(Alignment.CenterHorizontally)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
                 )
             }
@@ -222,8 +223,8 @@ fun LoginScreen(navController: NavController, tokenManager:TokenManager){
                     containerColor = Color.Black,
                     contentColor = Color.White),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredWidthIn(max = 420.dp)
+                    .width(maxWidth.value)
+                    .align(Alignment.CenterHorizontally)
                     .defaultMinSize(0.dp, 48.dp)
                 ) {
                 if (buttonLoading){
