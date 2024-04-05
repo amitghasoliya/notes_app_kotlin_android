@@ -1,6 +1,7 @@
 package com.amitghasoliya.notesapp.screens
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -71,6 +72,22 @@ fun NoteDetails(
     var newTitle by remember{ mutableStateOf(title) }
     val maxWidth = remember { mutableStateOf(440.dp) }
 
+    BackHandler {
+        if (title != newTitle || des != description){
+            val noteRequest = NoteRequest(newTitle, description)
+            val result = noteViewsModel.validateNote(title)
+            if (result.first){
+                noteViewsModel.updateNote(id,noteRequest)
+                noteViewsModel.isLoading.value = true
+                onClick()
+            }else{
+                Toast.makeText(context, result.second, Toast.LENGTH_SHORT).show()
+            }
+        }else{
+            navController.popBackStack()
+        }
+    }
+
     Scaffold(
         containerColor = Color.White,
         topBar = { TopAppBar(colors = TopAppBarColors(
@@ -80,7 +97,21 @@ fun NoteDetails(
             actionIconContentColor = Color.White,
             navigationIconContentColor = Color.Black),
             navigationIcon = {
-                IconButton(onClick = {navController.popBackStack()}) {
+                IconButton(onClick = {
+                    if (title != newTitle || des != description){
+                        val noteRequest = NoteRequest(newTitle, description)
+                        val result = noteViewsModel.validateNote(title)
+                        if (result.first){
+                            noteViewsModel.updateNote(id,noteRequest)
+                            noteViewsModel.isLoading.value = true
+                            onClick()
+                        }else{
+                            Toast.makeText(context, result.second, Toast.LENGTH_SHORT).show()
+                        }
+                    }else{
+                        navController.popBackStack()
+                    }
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_back),
                         modifier = Modifier.size(20.dp),
@@ -133,6 +164,7 @@ fun NoteDetails(
                         .align(Alignment.CenterHorizontally)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
                 )
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextField(value = description,
@@ -155,37 +187,12 @@ fun NoteDetails(
                     modifier = Modifier
                         .width(maxWidth.value)
                         .align(Alignment.CenterHorizontally)
-                        .defaultMinSize(0.dp, 200.dp)
+                        .defaultMinSize(0.dp, 260.dp)
                         .border(1.dp, Color.LightGray, RoundedCornerShape(6.dp))
                 )
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-
-            FilledTonalButton(
-                onClick = {
-                    val noteRequest = NoteRequest(newTitle, description)
-                    val result = noteViewsModel.validateNote(title)
-                    if (result.first){
-                        noteViewsModel.updateNote(id,noteRequest)
-                        noteViewsModel.isLoading.value = true
-                        onClick()
-                    }else{
-                        Toast.makeText(context, result.second, Toast.LENGTH_SHORT).show()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black,
-                    contentColor = Color.White),
-                modifier = Modifier
-                    .width(maxWidth.value)
-                    .align(Alignment.CenterHorizontally)
-                    .defaultMinSize(0.dp, 48.dp)
-            ) {
-                Text(text = "Update Note", fontSize = 18.sp)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             FilledTonalButton(
                 onClick = {
@@ -200,7 +207,7 @@ fun NoteDetails(
                     .align(Alignment.CenterHorizontally)
                     .defaultMinSize(0.dp, 48.dp)
             ) {
-                Text(text = "Delete Note", fontSize = 18.sp)
+                Text(text = "Delete Note", fontSize = 18.sp, fontWeight = FontWeight.Medium)
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
